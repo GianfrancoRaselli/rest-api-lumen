@@ -13,16 +13,20 @@
 |
 */
 
-$router->get('/', function () use ($router) {
-    return $router->app->version();
+$router->post('/usuarios/signup', 'UsuarioController@registrarUsuario');
+
+$router->get('/usuarios/signin', 'UsuarioController@iniciarSesion');
+
+$router->group(['middleware' => ['auth']], function () use ($router) {
+    $router->get('/usuarios/perfil', 'UsuarioController@perfil');
+
+    $router->get('/libros', 'LibroController@buscarLibrosDelUsuario');
+
+    $router->get('/libros/{id}', 'LibroController@buscarLibroDelUsuario');
+
+    $router->post('/libros', 'LibroController@guardarLibroDelUsuario');
+
+    $router->post('/libros/{id}', 'LibroController@actualizarLibroDelUsuario');
+
+    $router->delete('/libros/{id}', 'LibroController@eliminarLibroDelUsuario');
 });
-
-$router->get('/libros', 'LibroController@index');
-
-$router->get('/libros/{id}', 'LibroController@ver');
-
-$router->post('/libros', 'LibroController@guardar');
-
-$router->post('/libros/{id}', 'LibroController@actualizar');
-
-$router->delete('/libros/{id}', 'LibroController@eliminar');

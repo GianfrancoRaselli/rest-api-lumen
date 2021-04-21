@@ -16,8 +16,10 @@ class Libros extends Migration
         Schema::create('libros', function (Blueprint $table) {
             $table->id();
             $table->string('titulo', 250);
-            $table->string('imagen', 2500)->nullable();
-            $table->timestamps();
+            $table->string('imagen', 2500)->nullable()->collation('utf8mb4_bin');;
+            $table->unsignedBigInteger('id_usuario');
+            
+            $table->foreign('id_usuario')->references('id')->on('usuarios');
         });
     }
 

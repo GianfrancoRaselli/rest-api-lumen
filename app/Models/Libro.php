@@ -11,7 +11,13 @@ class Libro extends Model
     protected $fillable = [
         'titulo',
         'imagen',
+        'id_usuario',
     ];
 
-    // public $timestamps = false;
+    public $timestamps = false;
+
+    public function usuario()
+    {
+        return $this->belongsTo('App\Models\Usuario');
+    }
 }

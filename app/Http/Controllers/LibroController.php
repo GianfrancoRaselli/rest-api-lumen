@@ -9,19 +9,22 @@ use Carbon\Carbon;
 
 class LibroController extends Controller
 {
-    public function index() {
-        $libros = Libro::all();
+    public function buscarLibrosDelUsuario()
+    {
+        $libros = Libro::where('id_usuario', auth()->user()->id);
 
         return response()->json($libros);
     }
 
-    public function ver($id) {
-        $libro = Libro::find($id);
+    public function buscarLibroDelUsuario($id)
+    {
+        $libro = Libro::where([['id', $id_libro], ['id_usuario', auth()->user()->id]])->first();
 
         return response()->json($libro);
     }
 
-    public function guardar(Request $request) {
+    public function guardarLibroDelUsuario(Request $request)
+    {
         $libro = new Libro();
 
         $libro->titulo = $request->titulo;
@@ -36,13 +39,16 @@ class LibroController extends Controller
             $libro->imagen = ltrim($carpetaDestino, '.') . $nuevoNombre;
         }
 
+        $libro->id_usuario = auth()->user()->id;
+
         $libro->save();
 
         return response()->json($libro);
     }
 
-    public function actualizar(Request $request, $id) {
-        $libro = Libro::find($id);
+    public function actualizarLibroDelUsuario(Request $request, $id)
+    {
+        $libro = Libro::where([['id', $id], ['id_usuario', auth()->user()->id]])->first();
 
         if ($libro) {
             if ($request->input('titulo')) {
@@ -52,7 +58,7 @@ class LibroController extends Controller
             if ($request->hasFile('imagen')) {
                 if ($libro->imagen) {
                     $rutaArchivo = base_path('public') . $libro->imagen;
-                    
+
                     if (file_exists($rutaArchivo)) {
                         unlink($rutaArchivo);
                     }
@@ -60,10 +66,10 @@ class LibroController extends Controller
 
                 $nombreArchivoOriginal = $request->file('imagen')->getClientOriginalName();
                 $nuevoNombre = Carbon::now()->timestamp . '_' . $nombreArchivoOriginal;
-    
+
                 $carpetaDestino = './upload/';
                 $request->file('imagen')->move($carpetaDestino, $nuevoNombre);
-    
+
                 $libro->imagen = ltrim($carpetaDestino, '.') . $nuevoNombre;
             }
 
@@ -75,8 +81,9 @@ class LibroController extends Controller
         }
     }
 
-    public function eliminar($id) {
-        $libro = Libro::find($id);
+    public function eliminarLibroDelUsuario($id)
+    {
+        $libro = Libro::where([['id', $id], ['id_usuario', auth()->user()->id]])->first();
 
         if ($libro) {
             $rutaArchivo = base_path('public') . $libro->imagen;
