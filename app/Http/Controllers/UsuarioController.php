@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use Illuminate\Http\Request;
 use App\Models\Usuario;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -20,9 +21,13 @@ class UsuarioController extends Controller
         $usuario->email = $request->email;
         $usuario->api_token = Str::random(60);
 
-        $usuario->save();
+        try {
+            $usuario->save();
 
-        return response()->json($usuario, 200);
+            return response()->json($usuario, 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e], 406, []);
+        }
     }
 
     function iniciarSesion(Request $request)
