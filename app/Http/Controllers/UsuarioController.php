@@ -35,8 +35,12 @@ class UsuarioController extends Controller
         try {
             $usuario = Usuario::where('nombre_usuario', $request->nombre_usuario)->first();
 
-            if ($usuario && Hash::check($request->clave, $usuario->clave)) {
-                return response()->json($usuario, 200);
+            if($usuario) {
+                if (Hash::check($request->clave, $usuario->clave)) {
+                    return response()->json($usuario, 200);
+                } else {
+                    return response()->json(['error' => 'Clave incorrecta'], 406, []);
+                }
             } else {
                 return response()->json(['error' => 'Usuario no encontrado'], 406, []);
             }

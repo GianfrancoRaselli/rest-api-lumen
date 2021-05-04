@@ -15,7 +15,7 @@
 
 $router->post('/usuarios/signup', 'UsuarioController@registrarUsuario');
 
-$router->get('/usuarios/signin', 'UsuarioController@iniciarSesion');
+$router->post('/usuarios/signin', 'UsuarioController@iniciarSesion');
 
 $router->group(['middleware' => ['auth']], function () use ($router) {
     $router->get('/usuarios/perfil', 'UsuarioController@perfil');
