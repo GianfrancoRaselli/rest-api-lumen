@@ -4,98 +4,89 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Libro;
+use Exception;
 use Carbon\Carbon;
 
 class LibroController extends Controller
 {
     public function buscarLibrosDelUsuario()
     {
-        $libros = Libro::where('id_usuario', auth()->user()->id);
+        try {
+            $libros = Libro::where('id_usuario', auth()->user()->id)->get();
 
-        return response()->json($libros);
+            return response()->json($libros);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e], 406, []);
+        }
     }
 
     public function buscarLibroDelUsuario($id)
     {
-        $libro = Libro::where([['id', $id_libro], ['id_usuario', auth()->user()->id]])->first();
+        try {
+            $libro = Libro::where([['id', $id], ['id_usuario', auth()->user()->id]])->first();
 
-        return response()->json($libro);
+            return response()->json($libro);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e], 406, []);
+        }
     }
 
     public function guardarLibroDelUsuario(Request $request)
     {
-        $libro = new Libro();
+        try {
+            $libro = new Libro();
 
-        $libro->titulo = $request->titulo;
+            $libro->titulo = $request->titulo;
+            $libro->imagen = $request->imagen;
+            $libro->id_usuario = auth()->user()->id;
 
-        if ($request->hasFile('imagen')) {
-            $nombreArchivoOriginal = $request->file('imagen')->getClientOriginalName();
-            $nuevoNombre = Carbon::now()->timestamp . '_' . $nombreArchivoOriginal;
+            $libro->save();
 
-            $carpetaDestino = './upload/';
-            $request->file('imagen')->move($carpetaDestino, $nuevoNombre);
-
-            $libro->imagen = ltrim($carpetaDestino, '.') . $nuevoNombre;
+            return response()->json($libro);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e], 406, []);
         }
-
-        $libro->id_usuario = auth()->user()->id;
-
-        $libro->save();
-
-        return response()->json($libro);
     }
 
     public function actualizarLibroDelUsuario(Request $request, $id)
     {
-        $libro = Libro::where([['id', $id], ['id_usuario', auth()->user()->id]])->first();
+        try {
+            $libro = Libro::where([['id', $id], ['id_usuario', auth()->user()->id]])->first();
 
-        if ($libro) {
-            if ($request->input('titulo')) {
-                $libro->titulo = $request->input('titulo');
-            }
-
-            if ($request->hasFile('imagen')) {
-                if ($libro->imagen) {
-                    $rutaArchivo = base_path('public') . $libro->imagen;
-
-                    if (file_exists($rutaArchivo)) {
-                        unlink($rutaArchivo);
-                    }
+            if ($libro) {
+                if ($request->input('titulo')) {
+                    $libro->titulo = $request->input('titulo');
                 }
 
-                $nombreArchivoOriginal = $request->file('imagen')->getClientOriginalName();
-                $nuevoNombre = Carbon::now()->timestamp . '_' . $nombreArchivoOriginal;
+                if ($request->input('imagen')) {
+                    $libro->imagen = $request->input('imagen');
+                }
 
-                $carpetaDestino = './upload/';
-                $request->file('imagen')->move($carpetaDestino, $nuevoNombre);
+                $libro->save();
 
-                $libro->imagen = ltrim($carpetaDestino, '.') . $nuevoNombre;
+                return response()->json($libro);
+            } else {
+                return response()->json("No existe el libro");
             }
-
-            $libro->save();
-
-            return response()->json("Libro actualizado");
-        } else {
-            return response()->json("No existe el libro");
+        } catch (Exception $e) {
+            return response()->json(['error' => $e], 406, []);
         }
     }
 
     public function eliminarLibroDelUsuario($id)
     {
-        $libro = Libro::where([['id', $id], ['id_usuario', auth()->user()->id]])->first();
+        try {
+            $libro = Libro::where([['id', $id], ['id_usuario', auth()->user()->id]])->first();
 
-        if ($libro) {
-            $rutaArchivo = base_path('public') . $libro->imagen;
+            if ($libro) {
+                $libro->delete();
 
-            if (file_exists($rutaArchivo)) {
-                unlink($rutaArchivo);
+                return response()->json("Libro eliminado");
+            } else {
+                return response()->json("No existe el libro");
             }
-
-            $libro->delete();
-
-            return response()->json("Libro eliminado");
-        } else {
-            return response()->json("No existe el libro");
+        } catch (Exception $e) {
+            return response()->json(['error' => $e], 406, []);
         }
     }
 }
