@@ -54,13 +54,8 @@ class LibroController extends Controller
             $libro = Libro::where([['id', $id], ['id_usuario', auth()->user()->id]])->first();
 
             if ($libro) {
-                if ($request->input('titulo')) {
-                    $libro->titulo = $request->input('titulo');
-                }
-
-                if ($request->input('imagen')) {
-                    $libro->imagen = $request->input('imagen');
-                }
+                $libro->titulo = $request->titulo;
+                $libro->imagen = $request->imagen;
 
                 $libro->save();
 
